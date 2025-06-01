@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Роман - Динамичные сайты-визитки</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e1eef6 0%, #c5dfed 100%);
+            color: #2c3e50;
+            overflow-x: hidden;
+        }
+
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .hero {
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 8rem);
+            font-weight: 300;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #1abc9c, #2c3e50);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(26, 188, 156, 0.3);
+            animation: textPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            margin-bottom: 3rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        .glass-buttons {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .glass-btn {
+            padding: 1rem 2.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(26, 188, 156, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .glass-btn:hover::before {
+            left: 100%;
+        }
+
+        .glass-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(26, 188, 156, 0.3);
+            background: rgba(26, 188, 156, 0.1);
+        }
+
+        .services {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+        }
+
+        .services h2 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            margin-bottom: 3rem;
+            text-align: center;
+            color: #1abc9c;
+            font-weight: 300;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(26, 188, 156, 0.1) 0%, transparent 70%);
+            transform: rotate(0deg);
+            transition: transform 2s ease;
+        }
+
+        .service-card:hover::before {
+            transform: rotate(180deg);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(26, 188, 156, 0.2);
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1abc9c;
+            position: relative;
+            z-index: 1;
+        }
+
+        .service-card p {
+            opacity: 0.8;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .portfolio {
+            text-align: center;
+        }
+
+        .portfolio h2 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            margin-bottom: 2rem;
+            color: #2c3e50;
+            font-weight: 300;
+        }
+
+        .portfolio p {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            opacity: 0.7;
+        }
+
+        .controls {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .slider {
+            width: 150px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            outline: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #1abc9c;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1abc9c;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .contact {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            text-align: center;
+        }
+
+        .contact h2 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            margin-bottom: 2rem;
+            color: #1abc9c;
+            font-weight: 300;
+        }
+
+        .contact p {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            opacity: 0.8;
+        }
+
+        .pulse-btn {
+            position: relative;
+            margin: 0 1rem;
+        }
+
+        .pulse-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border: 2px solid #1abc9c;
+            border-radius: 15px;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s infinite;
+            opacity: 0;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .glass-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+
+    <section class="section hero">
+        <h1>Роман</h1>
+        <p>Динамичные сайты-визитки нового поколения</p>
+        <div class="glass-buttons">
+            <a href="https://wa.me/+79119396075" class="glass-btn pulse-btn">WhatsApp</a>
+            <a href="https://t.me/ramashery" class="glass-btn pulse-btn">Telegram</a>
+        </div>
+    </section>
+
+    <section class="section services">
+        <h2>Искусство в Движении</h2>
+        <div class="service-grid">
+            <div class="service-card">
+                <h3>Трансформация</h3>
+                <p>Плавное изменение форм создает уникальные визуальные переходы, которые завораживают и удерживают внимание посетителей вашего сайта.</p>
+            </div>
+            <div class="service-card">
+                <h3>Ритм</h3>
+                <p>Синхронизированное движение элементов создает гармоничную композицию, которая направляет взгляд и создает незабываемое впечатление.</p>
+            </div>
+            <div class="service-card">
+                <h3>Глубина</h3>
+                <p>Многослойные пространства добавляют объем и реализм, создавая иммерсивный опыт взаимодействия с вашим брендом.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section portfolio">
+        <h2>Этот сайт — ваше впечатление</h2>
+        <p>Управляйте генеративным искусством в реальном времени</p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Морфинг форм</label>
+                <input type="range" class="slider" id="morphSpeed" min="0" max="100" value="50">
+            </div>
+            <div class="control-group">
+                <label>Интенсивность движения</label>
+                <input type="range" class="slider" id="motionIntensity" min="0" max="100" value="50">
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="particleCount">0</div>
+                <div class="stat-label">Частицы</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="fps">0</div>
+                <div class="stat-label">FPS</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="morphsActive">0</div>
+                <div class="stat-label">Активные морфы</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section contact">
+        <h2>Создадим что-то удивительное</h2>
+        <div class="glass-buttons">
+            <a href="https://wa.me/+79119396075" class="glass-btn pulse-btn">WhatsApp</a>
+            <a href="https://t.me/ramashery" class="glass-btn pulse-btn">Telegram</a>
+        </div>
+    </section>
+
+    <script>
+        class PolymorphParticle {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.z = Math.random() * 1000;
+                
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.vz = (Math.random() - 0.5) * 0.5;
+                
+                this.shape = Math.floor(Math.random() * 5);
+                this.size = Math.random() * 15 + 3;
+                this.morphSpeed = Math.random() * 0.02 + 0.005;
+                this.morphProgress = 0;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+                this.rotation = 0;
+                
+                this.color = `hsla(${180 + Math.random() * 40}, 70%, 60%, ${0.3 + Math.random() * 0.4})`;
+                
+                this.connections = [];
+                this.maxConnections = 3;
+            }
+
+            update(particles, morphSpeed, motionIntensity) {
+                // Movement physics
+                this.x += this.vx * motionIntensity;
+                this.y += this.vy * motionIntensity;
+                this.z += this.vz * motionIntensity;
+                
+                // Boundary wrapping
+                if (this.x < 0) this.x = this.canvas.width;
+                if (this.x > this.canvas.width) this.x = 0;
+                if (this.y < 0) this.y = this.canvas.height;
+                if (this.y > this.canvas.height) this.y = 0;
+                if (this.z < 0) this.z = 1000;
+                if (this.z > 1000) this.z = 0;
+                
+                // Shape morphing
+                this.morphProgress += this.morphSpeed * morphSpeed;
+                if (this.morphProgress > 1) {
+                    this.morphProgress = 0;
+                    this.shape = (this.shape + 1) % 5;
+                }
+                
+                this.rotation += this.rotationSpeed * motionIntensity;
+                
+                // Update connections
+                this.updateConnections(particles);
+            }
+
+            updateConnections(particles) {
+                this.connections = [];
+                const maxDistance = 150;
+                
+                for (let other of particles) {
+                    if (other === this || this.connections.length >= this.maxConnections) break;
+                    
+                    const dx = this.x - other.x;
+                    const dy = this.y - other.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < maxDistance) {
+                        this.connections.push({
+                            particle: other,
+                            distance: distance,
+                            opacity: 1 - (distance / maxDistance)
+                        });
+                    }
+                }
+            }
+
+            draw(ctx) {
+                ctx.save();
+                
+                // Calculate depth-based properties
+                const depthFactor = 1 - (this.z / 1000);
+                const adjustedSize = this.size * depthFactor;
+                const adjustedOpacity = 0.3 + (depthFactor * 0.7);
+                
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                // Draw connections
+                ctx.strokeStyle = `rgba(26, 188, 156, ${adjustedOpacity * 0.3})`;
+                ctx.lineWidth = 1;
+                for (let connection of this.connections) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(
+                        connection.particle.x - this.x,
+                        connection.particle.y - this.y
+                    );
+                    ctx.globalAlpha = connection.opacity * adjustedOpacity;
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+                
+                // Draw shape based on current morph state
+                this.drawMorphedShape(ctx, adjustedSize, adjustedOpacity);
+                
+                ctx.restore();
+            }
+
+            drawMorphedShape(ctx, size, opacity) {
+                const progress = this.morphProgress;
+                const currentShape = this.shape;
+                const nextShape = (this.shape + 1) % 5;
+                
+                ctx.fillStyle = this.color.replace(/[\d.]+\)$/g, `${opacity})`);
+                ctx.strokeStyle = `rgba(26, 188, 156, ${opacity})`;
+                ctx.lineWidth = 1;
+                
+                // Interpolate between current and next shape
+                if (progress < 0.5) {
+                    this.drawShape(ctx, currentShape, size, 1 - progress * 2);
+                } else {
+                    this.drawShape(ctx, nextShape, size, (progress - 0.5) * 2);
+                }
+            }
+
+            drawShape(ctx, shapeType, size, intensity) {
+                ctx.save();
+                ctx.scale(intensity, intensity);
+                
+                switch (shapeType) {
+                    case 0: // Tetrahedron
+                        this.drawTetrahedron(ctx, size);
+                        break;
+                    case 1: // Dodecahedron
+                        this.drawDodecahedron(ctx, size);
+                        break;
+                    case 2: // Toroid
+                        this.drawToroid(ctx, size);
+                        break;
+                    case 3: // Klein bottle
+                        this.drawKleinBottle(ctx, size);
+                        break;
+                    case 4: // Fluid blob
+                        this.drawFluidBlob(ctx, size);
+                        break;
+                }
+                
+                ctx.restore();
+            }
+
+            drawTetrahedron(ctx, size) {
+                ctx.beginPath();
+                ctx.moveTo(0, -size);
+                ctx.lineTo(-size * 0.866, size * 0.5);
+                ctx.lineTo(size * 0.866, size * 0.5);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            drawDodecahedron(ctx, size) {
+                const sides = 12;
+                ctx.beginPath();
+                for (let i = 0; i < sides; i++) {
+                    const angle = (i / sides) * Math.PI * 2;
+                    const x = Math.cos(angle) * size;
+                    const y = Math.sin(angle) * size;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            drawToroid(ctx, size) {
+                const outerRadius = size;
+                const innerRadius = size * 0.4;
+                
+                ctx.beginPath();
+                ctx.arc(0, 0, outerRadius, 0, Math.PI * 2);
+                ctx.arc(0, 0, innerRadius, 0, Math.PI * 2, true);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(0, 0, outerRadius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, 0, innerRadius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            drawKleinBottle(ctx, size) {
+                ctx.beginPath();
+                for (let t = 0; t < Math.PI * 2; t += 0.1) {
+                    const x = size * Math.cos(t) * (1 + 0.3 * Math.sin(t * 3));
+                    const y = size * Math.sin(t) * (1 + 0.2 * Math.cos(t * 2));
+                    if (t === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            drawFluidBlob(ctx, size) {
+                const points = 8;
+                ctx.beginPath();
+                for (let i = 0; i < points; i++) {
+                    const angle = (i / points) * Math.PI * 2;
+                    const radius = size * (0.8 + 0.4 * Math.sin(Date.now() * 0.005 + i));
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+
+        class ParticleSystem {
+            constructor() {
+                this.canvas = document.getElementById('particleCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.particleCount = 100;
+                this.morphSpeed = 0.5;
+                this.motionIntensity = 0.5;
+                
+                this.fps = 0;
+                this.frameCount = 0;
+                this.lastTime = Date.now();
+                
+                this.init();
+                this.setupControls();
+                this.animate();
+            }
+
+            init() {
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
+                
+                // Create particles
+                for (let i = 0; i < this.particleCount; i++) {
+                    this.particles.push(new PolymorphParticle(this.canvas));
+                }
+            }
+
+            resizeCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            setupControls() {
+                const morphSlider = document.getElementById('morphSpeed');
+                const motionSlider = document.getElementById('motionIntensity');
+                
+                morphSlider.addEventListener('input', (e) => {
+                    this.morphSpeed = e.target.value / 100;
+                });
+                
+                motionSlider.addEventListener('input', (e) => {
+                    this.motionIntensity = e.target.value / 100;
+                });
+            }
+
+            updateStats() {
+                this.frameCount++;
+                const now = Date.now();
+                if (now - this.lastTime >= 1000) {
+                    this.fps = this.frameCount;
+                    this.frameCount = 0;
+                    this.lastTime = now;
+                    
+                    document.getElementById('particleCount').textContent = this.particles.length;
+                    document.getElementById('fps').textContent = this.fps;
+                    
+                    const morphsActive = this.particles.filter(p => p.morphProgress > 0).length;
+                    document.getElementById('morphsActive').textContent = morphsActive;
+                }
+            }
+
+            animate() {
+                // Clear canvas with fade effect
+                this.ctx.fillStyle = 'rgba(225, 238, 246, 0.05)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Update and draw particles
+                for (let particle of this.particles) {
+                    particle.update(this.particles, this.morphSpeed, this.motionIntensity);
+                    particle.draw(this.ctx);
+                }
+                
+                this.updateStats();
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Initialize the particle system when page loads
+        window.addEventListener('load', () => {
+            new ParticleSystem();
+        });
+
+        // Smooth scrolling for mobile
+        document.addEventListener('touchstart', () => {}, {passive: true});
+    </script>
+</body>
+</html>
